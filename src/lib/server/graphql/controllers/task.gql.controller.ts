@@ -33,11 +33,14 @@ export const taskGqlController = {
     const user = requireAuth(ctx);
     try {
       const t = await taskService.create(user.id, args.input);
+
       return {
         id: t.id,
         title: t.title,
         description: t.description ?? "",
         status: t.status,
+        totalTrackedSec: 0,
+        activeStartedAt: null,
       };
     } catch (e) {
       mapServiceError(e);
@@ -48,11 +51,21 @@ export const taskGqlController = {
     const user = requireAuth(ctx);
     try {
       const task = await taskService.update(user.id, args.id, args);
+
+      const [totalsMap, activeMap] = await Promise.all([
+        timelogQueryService.totals(user.id),
+        timelogQueryService.active(user.id),
+      ]);
+
+      const id = String(task.id);
+
       return {
-        id: String(task.id),
+        id,
         title: task.title,
         description: task.description ?? "",
         status: task.status,
+        totalTrackedSec: totalsMap.get(id) ?? 0,
+        activeStartedAt: activeMap.get(id) ?? null,
       };
     } catch (e) {
       mapServiceError(e);
