@@ -34,6 +34,15 @@ const yogaApp = createYoga<RequestEvent>({
         title: String!
         description: String!
         status: TaskStatus!
+        totalTrackedSec: Int!
+        activeStartedAt: String
+      }
+
+      type Task {
+        id: ID!
+        title: String!
+        description: String!
+        status: TaskStatus!
       }
 
       type TimeLog {
@@ -57,6 +66,7 @@ const yogaApp = createYoga<RequestEvent>({
         me: User
         tasks: [Task!]!
         todaySummary: TodaySummary!
+        imeLogs(taskId: ID): [TimeLog!]!
       }
 
       type Mutation {
@@ -83,6 +93,7 @@ const yogaApp = createYoga<RequestEvent>({
         me: authGqlController.me,
         tasks: taskGqlController.tasks,
         todaySummary: summaryGqlController.todaySummary,
+        timeLogs: timelogGqlController.timeLogs,
       },
       Mutation: {
         signup: authGqlController.signup,
