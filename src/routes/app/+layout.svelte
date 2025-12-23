@@ -13,6 +13,8 @@
 <nav style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #ddd;">
   <a href="/app/tasks">Tasks</a>
   <a href="/app/summary">Today Summary</a>
+  <a href="/app/logs">Logs</a>
+
 
   <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
     <span>{data.user.email}</span>
