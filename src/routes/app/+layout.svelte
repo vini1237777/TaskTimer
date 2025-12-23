@@ -4,23 +4,28 @@
 
   const LOGOUT = `mutation { logout }`;
 
+  function pathActive(path: string) {
+    return location?.pathname?.startsWith(path) ? 'active' : '';
+  }
+
   async function logout() {
     await gql<{ logout: boolean }>(LOGOUT);
     location.href = '/auth/login';
   }
 </script>
 
-<nav style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #ddd;">
-  <a href="/app/tasks">Tasks</a>
-  <a href="/app/summary">Today Summary</a>
-  <a href="/app/logs">Logs</a>
+<div class="nav">
+  <div class="nav-inner">
+    <a class={pathActive('/app/tasks')} href="/app/tasks">Tasks</a>
+    <a class={pathActive('/app/summary')} href="/app/summary">Today</a>
+    <a class={pathActive('/app/logs')} href="/app/logs">Logs</a>
 
-
-  <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
-    <span>{data.user.email}</span>
-    <button on:click={logout}>Logout</button>
+    <div style="margin-left:auto" class="row">
+      <span class="badge">{data.user.email}</span>
+      <button class="btn-danger" on:click={logout}>Logout</button>
+    </div>
   </div>
-</nav>
+</div>
 
 <main class="container">
   <slot />
