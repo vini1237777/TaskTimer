@@ -18,6 +18,9 @@
   let error = '';
   let loading = false;
 
+  let suggested: { title: string; description: string } | null = null;
+  let suggesting = false;
+
   let now = Date.now();
   let tick: any;
 
@@ -37,7 +40,12 @@
   const CREATE = `
     mutation Create($input: String!) {
       createTask(input: $input) {
-        id title description status totalTrackedSec activeStartedAt
+        id
+        title
+        description
+        status
+        totalTrackedSec
+        activeStartedAt
       }
     }
   `;
@@ -45,7 +53,12 @@
   const UPDATE = `
     mutation Update($id: ID!, $status: TaskStatus) {
       updateTask(id: $id, status: $status) {
-        id title description status totalTrackedSec activeStartedAt
+        id
+        title
+        description
+        status
+        totalTrackedSec
+        activeStartedAt
       }
     }
   `;
@@ -66,30 +79,11 @@
     }
   `;
 
-   let suggested: { title: string; description: string } | null = null;
-let suggesting = false;
-
-const SUGGEST = `
-  mutation Suggest($input: String!) {
-    suggestTask(input: $input) { title description }
-  }
-`;
-
-async function suggest() {
-  const t = title.trim();
-  if (!t) return;
-  error = '';
-  suggesting = true;
-  try {
-    const data = await gql<{ suggestTask: { title: string; description: string } }>(SUGGEST, { input: t });
-    suggested = data.suggestTask;
-  } catch (e: any) {
-    error = e?.message || 'Failed to suggest';
-  } finally {
-    suggesting = false;
-  }
-}
-
+  const SUGGEST = `
+    mutation Suggest($input: String!) {
+      suggestTask(input: $input) { title description }
+    }
+  `;
 
   function format(sec: number) {
     const h = Math.floor(sec / 3600);
@@ -133,6 +127,7 @@ async function suggest() {
     try {
       await gql(CREATE, { input: t });
       title = '';
+      suggested = null;
       await loadTasks();
     } catch (e: any) {
       error = e?.message || 'Failed to add task';
@@ -181,6 +176,29 @@ async function suggest() {
     }
   }
 
+  async function suggest() {
+    const t = title.trim();
+    if (!t) return;
+
+    error = '';
+    suggesting = true;
+    try {
+      const data = await gql<{ suggestTask: { title: string; description: string } }>(SUGGEST, { input: t });
+      suggested = data.suggestTask;
+    } catch (e: any) {
+      error = e?.message || 'Failed to suggest';
+    } finally {
+      suggesting = false;
+    }
+  }
+
+  function applySuggestion() {
+    if (!suggested) return;
+    title = suggested.title;
+    // NOTE: createTask currently accepts only input(title). Description can be applied when you add edit UI.
+    suggested = null;
+  }
+
   onMount(async () => {
     await loadTasks();
     tick = setInterval(() => (now = Date.now()), 1000);
@@ -203,19 +221,42 @@ async function suggest() {
       />
     </div>
 
-    <button class="btn-primary" on:click={addTask} disabled={loading}>
+    <button on:click={suggest} disabled={suggesting || !title.trim()}>
+      {suggesting ? 'Suggesting…' : '✨ Suggest'}
+    </button>
+
+    <button class="btn-primary" on:click={addTask} disabled={loading || !title.trim()}>
       {loading ? 'Adding…' : 'Add'}
     </button>
-    <button on:click={suggest} disabled={suggesting}>
-  {suggesting ? 'Suggesting…' : 'Suggest'}
-</button>
-
   </div>
 
   {#if error}
     <p class="error" style="margin:10px 0 0;">{error}</p>
   {/if}
 </div>
+
+{#if suggested}
+  <div class="card card-pad" style="max-width:720px; margin-top:12px;">
+    <div class="row" style="justify-content:space-between;">
+      <strong>Suggestion</strong>
+      <div class="row">
+        <button class="btn-primary" on:click={applySuggestion}>Use title</button>
+        <button on:click={() => (suggested = null)}>Dismiss</button>
+      </div>
+    </div>
+
+    <p class="subtle" style="margin:10px 0 0;">
+      <strong>Title:</strong> {suggested.title}
+    </p>
+    <p class="subtle" style="margin:8px 0 0;">
+      <strong>Description:</strong> {suggested.description}
+    </p>
+
+    <p class="subtle" style="margin:10px 0 0;">
+      Tip: “Use title” will fill the input — then click <span class="kbd">Add</span>.
+    </p>
+  </div>
+{/if}
 
 <div style="height:14px"></div>
 
@@ -255,7 +296,7 @@ async function suggest() {
           <select
             value={task.status}
             on:change={(e) => setStatus(task.id, e.currentTarget.value as TaskStatus)}
-            style="min-width:160px;"
+            style="min-width:180px;"
           >
             <option value="PENDING">Pending</option>
             <option value="IN_PROGRESS">In Progress</option>
@@ -272,18 +313,5 @@ async function suggest() {
         </div>
       </div>
     </div>
-    {#if suggested}
-  <div class="card card-pad" style="max-width:720px; margin-top:12px;">
-    <div class="row" style="justify-content:space-between;">
-      <strong>Suggestion</strong>
-      <button class="btn-primary" on:click={() => { title = suggested.title; suggested = null; }}>
-        Use title
-      </button>
-    </div>
-    <p class="subtle" style="margin:8px 0 0;"><strong>Title:</strong> {suggested.title}</p>
-    <p class="subtle" style="margin:6px 0 0;"><strong>Description:</strong> {suggested.description}</p>
-  </div>
-{/if}
-
   {/each}
 </div>
