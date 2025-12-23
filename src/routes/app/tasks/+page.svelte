@@ -66,6 +66,31 @@
     }
   `;
 
+   let suggested: { title: string; description: string } | null = null;
+let suggesting = false;
+
+const SUGGEST = `
+  mutation Suggest($input: String!) {
+    suggestTask(input: $input) { title description }
+  }
+`;
+
+async function suggest() {
+  const t = title.trim();
+  if (!t) return;
+  error = '';
+  suggesting = true;
+  try {
+    const data = await gql<{ suggestTask: { title: string; description: string } }>(SUGGEST, { input: t });
+    suggested = data.suggestTask;
+  } catch (e: any) {
+    error = e?.message || 'Failed to suggest';
+  } finally {
+    suggesting = false;
+  }
+}
+
+
   function format(sec: number) {
     const h = Math.floor(sec / 3600);
     const m = Math.floor((sec % 3600) / 60);
@@ -181,6 +206,10 @@
     <button class="btn-primary" on:click={addTask} disabled={loading}>
       {loading ? 'Adding…' : 'Add'}
     </button>
+    <button on:click={suggest} disabled={suggesting}>
+  {suggesting ? 'Suggesting…' : 'Suggest'}
+</button>
+
   </div>
 
   {#if error}
@@ -243,5 +272,18 @@
         </div>
       </div>
     </div>
+    {#if suggested}
+  <div class="card card-pad" style="max-width:720px; margin-top:12px;">
+    <div class="row" style="justify-content:space-between;">
+      <strong>Suggestion</strong>
+      <button class="btn-primary" on:click={() => { title = suggested.title; suggested = null; }}>
+        Use title
+      </button>
+    </div>
+    <p class="subtle" style="margin:8px 0 0;"><strong>Title:</strong> {suggested.title}</p>
+    <p class="subtle" style="margin:6px 0 0;"><strong>Description:</strong> {suggested.description}</p>
+  </div>
+{/if}
+
   {/each}
 </div>
