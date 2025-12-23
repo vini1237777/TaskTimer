@@ -25,6 +25,7 @@ const yogaApp = createYoga<RequestEvent>({
         id: ID!
         email: String!
       }
+
       type AuthPayload {
         user: User!
       }
@@ -36,13 +37,6 @@ const yogaApp = createYoga<RequestEvent>({
         status: TaskStatus!
         totalTrackedSec: Int!
         activeStartedAt: String
-      }
-
-      type Task {
-        id: ID!
-        title: String!
-        description: String!
-        status: TaskStatus!
       }
 
       type TimeLog {
@@ -66,7 +60,7 @@ const yogaApp = createYoga<RequestEvent>({
         me: User
         tasks: [Task!]!
         todaySummary: TodaySummary!
-        imeLogs(taskId: ID): [TimeLog!]!
+        timeLogs(taskId: ID): [TimeLog!]!
       }
 
       type Mutation {
@@ -87,6 +81,7 @@ const yogaApp = createYoga<RequestEvent>({
         stopTimer(taskId: ID!): TimeLog!
       }
     `,
+
     resolvers: {
       Query: {
         hello: () => "GraphQL OK",
