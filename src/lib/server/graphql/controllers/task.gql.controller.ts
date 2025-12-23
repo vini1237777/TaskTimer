@@ -1,17 +1,29 @@
 import { taskService } from "$lib/server/services/task.service";
 import { requireAuth, mapServiceError } from "./errors";
+import { timelogQueryService } from "$lib/server/services/timelog.query.service";
 
 export const taskGqlController = {
   tasks: async (_: any, __: any, ctx: any) => {
     const user = requireAuth(ctx);
+
     try {
-      const tasks = await taskService.list(user.id);
-      return tasks.map((t: any) => ({
-        id: String(t._id),
-        title: t.title,
-        description: t.description ?? "",
-        status: t.status,
-      }));
+      const [tasks, totalsMap, activeMap] = await Promise.all([
+        taskService.list(user.id),
+        timelogQueryService.totals(user.id),
+        timelogQueryService.active(user.id),
+      ]);
+
+      return tasks.map((t: any) => {
+        const id = String(t._id);
+        return {
+          id,
+          title: t.title,
+          description: t.description ?? "",
+          status: t.status,
+          totalTrackedSec: totalsMap.get(id) ?? 0,
+          activeStartedAt: activeMap.get(id) ?? null,
+        };
+      });
     } catch (e) {
       mapServiceError(e);
     }
