@@ -10,17 +10,15 @@
   let error = '';
   let loading = false;
 
-  // live timer state
   let activeTaskId: string | null = null;
   let activeStartedAt: number | null = null;
   let now = Date.now();
   let tick: any;
 
   const TASKS = `
-    query {
-      tasks { id title description status }
-    }
-  `;
+   query {
+  tasks { id title description status totalTrackedSec activeStartedAt }
+} `;
 
   const CREATE = `
     mutation Create($input: String!) {
@@ -162,11 +160,17 @@
         <div style="min-width:240px;">
           <div><strong>{task.title}</strong></div>
           <small>{task.status}</small>
-          {#if activeTaskId === task.id}
-            <div style="margin-top:6px;">
-              <small>⏱ Live: {format(activeElapsedSec())}</small>
-            </div>
-          {/if}
+          <div style="margin-top:6px;">
+  <small>Tracked: {format(task.totalTrackedSec)}</small>
+</div>
+
+{#if task.activeStartedAt}
+  <div style="margin-top:4px;">
+    <small>⏱ Live: {format(Math.floor((now - Date.parse(task.activeStartedAt)) / 1000))}</small>
+  </div>
+{/if}
+
+
         </div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
