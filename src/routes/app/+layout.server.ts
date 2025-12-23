@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 
 export function load({ locals }: { locals: any }) {
-  if (!locals?.user) throw redirect(302, "/auth/login");
-  return { user: locals?.user };
+  if (!locals.user) throw redirect(302, "/auth/login");
+  return { user: locals.user };
 }

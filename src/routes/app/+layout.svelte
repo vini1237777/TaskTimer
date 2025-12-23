@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { gql } from '$lib/client/gql';
   export let data: { user: { email: string } };
 
+  const LOGOUT = `mutation { logout }`;
+
   async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await gql<{ logout: boolean }>(LOGOUT);
     location.href = '/auth/login';
   }
 </script>
