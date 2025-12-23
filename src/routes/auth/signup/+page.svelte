@@ -21,15 +21,21 @@
   }
 </script>
 
+<div class="container">
+
 <h1>Sign up</h1>
 
+ <div style="display:grid; gap:12px; max-width:700px;">
 <input placeholder="Email" bind:value={email} />
 <input placeholder="Password (min 6 chars)" type="password" bind:value={password} />
-
 <button on:click={submit}>Create account</button>
+</div>
+
 
 {#if error}
   <p style="color:red">{error}</p>
 {/if}
 
 <p><a href="/auth/login">Already have an account?</a></p>
+
+</div>
