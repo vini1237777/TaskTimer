@@ -5,30 +5,16 @@ import { connectMongo } from "$lib/server/db/mongo";
 import { userDao } from "$lib/server/dao/user.dao";
 import { sessionDao } from "$lib/server/dao/session.dao";
 
-const COOKIE_NAME = "sid";
-const SESSION_DAYS = 7;
+export const COOKIE_NAME = "sid";
+export const SESSION_DAYS = 7;
 
-function hashToken(raw: string) {
+function tokenHash(raw: string) {
   return createHash("sha256")
     .update(raw + SESSION_SECRET)
     .digest("hex");
 }
 
-export function setSessionCookie(cookies: any, rawToken: string) {
-  cookies.set(COOKIE_NAME, rawToken, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * SESSION_DAYS,
-  });
-}
-
-export function clearSessionCookie(cookies: any) {
-  cookies.delete(COOKIE_NAME, { path: "/" });
-}
-
-export async function signup(email: string, password: string) {
+export async function signupUser(email: string, password: string) {
   await connectMongo();
 
   const existing = await userDao.findByEmail(email);
@@ -39,12 +25,12 @@ export async function signup(email: string, password: string) {
 
   const rawToken = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await sessionDao.create(user._id.toString(), hashToken(rawToken), expiresAt);
+  await sessionDao.create(user._id.toString(), tokenHash(rawToken), expiresAt);
 
   return { user: { id: user._id.toString(), email: user.email }, rawToken };
 }
 
-export async function login(email: string, password: string) {
+export async function loginUser(email: string, password: string) {
   await connectMongo();
 
   const user = await userDao.findByEmail(email);
@@ -55,21 +41,26 @@ export async function login(email: string, password: string) {
 
   const rawToken = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  await sessionDao.create(user._id.toString(), hashToken(rawToken), expiresAt);
+  await sessionDao.create(user._id.toString(), tokenHash(rawToken), expiresAt);
 
   return { user: { id: user._id.toString(), email: user.email }, rawToken };
 }
 
-export async function getUserFromCookies(cookies: any) {
+export async function getUserFromRawToken(rawToken: string | null) {
+  if (!rawToken) return null;
   await connectMongo();
-  const raw = cookies.get(COOKIE_NAME);
-  if (!raw) return null;
 
-  const session = await sessionDao.findByTokenHash(hashToken(raw));
+  const session = await sessionDao.findByTokenHash(tokenHash(rawToken));
   if (!session) return null;
 
   const user = await userDao.findById(String(session.userId));
   if (!user) return null;
 
   return { id: String(user._id), email: user.email };
+}
+
+export async function revokeSession(rawToken: string | null) {
+  if (!rawToken) return;
+  await connectMongo();
+  await sessionDao.deleteByTokenHash(tokenHash(rawToken));
 }
