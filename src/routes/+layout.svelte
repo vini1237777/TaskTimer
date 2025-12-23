@@ -1,4 +1,6 @@
 <script lang="ts">
+import '../app.css';
+
   export let data: { user: { email: string } };
 
   async function logout() {
@@ -12,7 +14,7 @@
   <a href="/app/summary">Today Summary</a>
 
   <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
-    <span>{data.user.email}</span>
+    <span>{data?.user?.email}</span>
     <button on:click={logout}>Logout</button>
   </div>
 </nav>
