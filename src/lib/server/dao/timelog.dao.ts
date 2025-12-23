@@ -24,6 +24,11 @@ export const timelogDao = {
     return TimeLog.find(q).sort({ startedAt: -1 }).limit(200).lean();
   },
 
+  listByUserAndDayUTC: (userId: string, start: Date, end: Date) =>
+    TimeLog.find({ userId, startedAt: { $gte: start, $lt: end } })
+      .sort({ startedAt: -1 })
+      .lean(),
+
   totalsByTask: (userId: string) =>
     TimeLog.aggregate([
       { $match: { userId } },
