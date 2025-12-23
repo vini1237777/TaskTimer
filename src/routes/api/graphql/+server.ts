@@ -6,6 +6,7 @@ import { taskGqlController } from "$lib/server/graphql/controllers/task.gql.cont
 import { timelogGqlController } from "$lib/server/graphql/controllers/timelog.gql.controller";
 import { summaryGqlController } from "$lib/server/graphql/controllers/summary.gql.controller";
 import { authGqlController } from "$lib/server/graphql/controllers/auth.gql.controller";
+import { aiGqlController } from "$lib/server/graphql/controllers/ai.gql.controller";
 
 import {
   COOKIE_NAME,
@@ -19,6 +20,11 @@ const yogaApp = createYoga<RequestEvent>({
         PENDING
         IN_PROGRESS
         COMPLETED
+      }
+
+      type TaskSuggestion {
+        title: String!
+        description: String!
       }
 
       type User {
@@ -68,6 +74,7 @@ const yogaApp = createYoga<RequestEvent>({
         login(email: String!, password: String!): AuthPayload!
         logout: Boolean!
 
+        suggestTask(input: String!): TaskSuggestion!
         createTask(input: String!): Task!
         updateTask(
           id: ID!
@@ -95,6 +102,7 @@ const yogaApp = createYoga<RequestEvent>({
         login: authGqlController.login,
         logout: authGqlController.logout,
 
+        suggestTask: aiGqlController.suggestTask,
         createTask: taskGqlController.createTask,
         updateTask: taskGqlController.updateTask,
         deleteTask: taskGqlController.deleteTask,
