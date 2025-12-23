@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { MONGODB_URI } from "$env/static/private";
 
 let connected = false;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 export async function connectMongo() {
   if (connected) return;

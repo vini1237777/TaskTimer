@@ -1,12 +1,14 @@
 import bcrypt from "bcryptjs";
 import { randomBytes, createHash } from "crypto";
-import { SESSION_SECRET } from "$env/static/private";
+
 import { connectMongo } from "$lib/server/db/mongo";
 import { userDao } from "$lib/server/dao/user.dao";
 import { sessionDao } from "$lib/server/dao/session.dao";
 
 export const COOKIE_NAME = "sid";
 export const SESSION_DAYS = 7;
+
+const SESSION_SECRET = process.env.SESSION_SECRET || "";
 
 function tokenHash(raw: string) {
   return createHash("sha256")
