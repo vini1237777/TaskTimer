@@ -33,19 +33,21 @@
 </script>
 
 <div class="container">
-  <h1>Login</h1>
+  <div class="card card-pad" style="max-width:560px; margin: 30px auto;">
+    <h1 class="h1">Welcome back</h1>
+    <p class="subtle">Login to continue tracking tasks and focus time.</p>
 
-  <div style="display:grid; gap:12px; max-width:700px;">
-    <input placeholder="Email" bind:value={email} />
-    <input placeholder="Password" type="password" bind:value={password} />
-    <button on:click={submit} disabled={loading}>
-      {loading ? 'Logging in...' : 'Login'}
-    </button>
+    <div class="grid">
+      <input placeholder="you@company.com" bind:value={email} />
+      <input placeholder="Password" type="password" bind:value={password} />
+      <button class="btn-primary" on:click={submit} disabled={loading}>
+        {loading ? 'Logging in…' : 'Login'}
+      </button>
+      {#if error}<p class="error">{error}</p>{/if}
+    </div>
+
+    <p class="subtle" style="margin-top:14px">
+      New here? <a href="/auth/signup">Create an account</a>
+    </p>
   </div>
-
-  {#if error}
-    <p style="color:red">{error}</p>
-  {/if}
-
-  <p><a href="/auth/signup">Create account</a></p>
 </div>

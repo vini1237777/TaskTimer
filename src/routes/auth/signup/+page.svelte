@@ -33,19 +33,21 @@
 </script>
 
 <div class="container">
-  <h1>Sign up</h1>
+  <div class="card card-pad" style="max-width:560px; margin: 30px auto;">
+    <h1 class="h1">Create your account</h1>
+    <p class="subtle">Takes 20 seconds. Start with one task and hit Start.</p>
 
-  <div style="display:grid; gap:12px; max-width:700px;">
-    <input placeholder="Email" bind:value={email} />
-    <input placeholder="Password (min 6 chars)" type="password" bind:value={password} />
-    <button on:click={submit} disabled={loading}>
-      {loading ? 'Creating...' : 'Create account'}
-    </button>
+    <div class="grid">
+      <input placeholder="you@company.com" bind:value={email} />
+      <input placeholder="Password (min 6 chars)" type="password" bind:value={password} />
+      <button class="btn-primary" on:click={submit} disabled={loading}>
+        {loading ? 'Creating…' : 'Create account'}
+      </button>
+      {#if error}<p class="error">{error}</p>{/if}
+    </div>
+
+    <p class="subtle" style="margin-top:14px">
+      Already have an account? <a href="/auth/login">Login</a>
+    </p>
   </div>
-
-  {#if error}
-    <p style="color:red">{error}</p>
-  {/if}
-
-  <p><a href="/auth/login">Already have an account?</a></p>
 </div>
