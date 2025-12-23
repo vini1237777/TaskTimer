@@ -43,3 +43,25 @@ button:disabled {
   margin: 0 auto;
   padding: 16px;
 }
+
+nav a {
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  nav > div {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  input,
+  button {
+    width: 95%;
+  }
+}

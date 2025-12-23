@@ -22,17 +22,17 @@
 </script>
 
 <div class="container">
+  <h1>Login</h1>
 
-<h1>Login</h1>
+  <div style="display:grid; gap:12px; max-width:700px;">
+    <input placeholder="Email" bind:value={email} />
+    <input placeholder="Password" type="password" bind:value={password} />
+    <button on:click={submit}>Login</button>
+  </div>
 
-<input placeholder="Email" bind:value={email} />
-<input placeholder="Password" type="password" bind:value={password} />
+  {#if error}
+    <p style="color:red">{error}</p>
+  {/if}
 
-<button on:click={submit}>Login</button>
-
-{#if error}
-  <p style="color:red">{error}</p>
-{/if}
-
-<p><a href="/auth/signup">Create account</a></p>
+  <p><a href="/auth/signup">Create account</a></p>
 </div>
