@@ -17,7 +17,6 @@ export const timelogDao = {
     }),
 
   save: (doc: any) => doc.save(),
-
   listByUserAndTask: (userId: string, taskId?: string | null) => {
     const q: any = { userId };
     if (taskId) q.taskId = taskId;
