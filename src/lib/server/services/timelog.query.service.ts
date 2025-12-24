@@ -21,10 +21,10 @@ export const timelogQueryService = {
   async active(userId: string) {
     if (!userId) throw ERR.unauth();
     await connectMongo();
-    const logs = await timelogDao.activeByUser(userId);
+    const rows = await timelogDao.active(userId);
     const map = new Map<string, string>();
-    for (const l of logs)
-      map.set(String(l.taskId), new Date(l.startedAt).toISOString());
+    for (const r of rows)
+      map.set(String(r._id), new Date(r.startedAt).toISOString());
     return map;
   },
 };

@@ -1,4 +1,9 @@
 import { TimeLog } from "$lib/server/models/timelog.model";
+import mongoose from "mongoose";
+
+function oid(id: string) {
+  return new mongoose.Types.ObjectId(id);
+}
 
 export const timelogDao = {
   activeForTask: (userId: string, taskId: string) =>
@@ -6,6 +11,17 @@ export const timelogDao = {
 
   activeByUser: (userId: string) =>
     TimeLog.find({ userId, endedAt: null }).lean(),
+
+  active: (userId: string) =>
+    TimeLog.aggregate([
+      {
+        $match: {
+          userId: oid(userId),
+          endedAt: null,
+        },
+      },
+      { $group: { _id: "$taskId", startedAt: { $min: "$startedAt" } } },
+    ]),
 
   create: (userId: string, taskId: string, startedAt: Date) =>
     TimeLog.create({
@@ -33,7 +49,13 @@ export const timelogDao = {
 
   totalsByTask: (userId: string) =>
     TimeLog.aggregate([
-      { $match: { userId, endedAt: { $ne: null }, durationSec: { $gt: 0 } } },
+      {
+        $match: {
+          userId: oid(userId),
+          endedAt: { $ne: null },
+          durationSec: { $gt: 0 },
+        },
+      },
       { $group: { _id: "$taskId", total: { $sum: "$durationSec" } } },
     ]),
 };

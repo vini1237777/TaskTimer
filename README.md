@@ -1,39 +1,40 @@
-# sv
+# Task and Time Tracking App
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A full-stack Task and Time Tracking app where users can manage tasks, start/stop a real-time timer, view time logs, and see a daily productivity summary. Built with SvelteKit and GraphQL, backed by MongoDB.
 
-## Creating a project
+## Live Deployed Link
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Live App: https://task-timer-two.vercel.app/auth/login
 
-```sh
-# create a new project in the current directory
-npx sv create
+Test credentials:
 
-# create a new project in my-app
-npx sv create my-app
+- Email: user@gmail.com
+- Password: user@123
+
+## Tech Stack (Brief)
+
+- Frontend: SvelteKit, Svelte, TypeScript
+- Backend/API: SvelteKit server routes, GraphQL Yoga
+- Database: MongoDB + Mongoose
+- Authentication: Cookie based session auth
+- Optional AI: LangChain + OpenAI (task title/description suggestions)
+- Deployment: Vercel
+
+## Local Development Setup
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/vini1237777/TaskTimer
 ```
 
-## Developing
+2. npm install
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+3.npm run dev
 
-```sh
-npm run dev
+## Authentication (Working)
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-# TaskTimer
+- Users can sign up, log in, and log out.
+- Session is stored using secure cookies.
+- All protected pages and GraphQL operations require authentication.
+- If not logged in, accessing `/app/*` redirects to `/auth/login` (and APIs return an auth error).

@@ -331,6 +331,10 @@
             {/if}
 
             <div style="margin-top:10px;">
+              <small class="subtle" style="display:block; margin:0;">
+               Tracked: {format(trackedSec(task))}
+              </small>
+
               {#if task.activeStartedAt}
                 <small style="display:block; margin-top:4px;">
                   ⏱ Live: {format(liveSec(task.activeStartedAt, now))}
