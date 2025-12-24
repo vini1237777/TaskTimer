@@ -93,12 +93,13 @@
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
-  function liveSec(startedAtIso?: string | null) {
-    if (!startedAtIso) return 0;
-    const started = Date.parse(startedAtIso);
-    if (Number.isNaN(started)) return 0;
-    return Math.max(0, Math.floor((now - started) / 1000));
-  }
+function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
+  if (!startedAtIso) return 0;
+  const started = Date.parse(startedAtIso);
+  if (Number.isNaN(started)) return 0;
+  return Math.max(0, Math.floor((nowMs - started) / 1000));
+}
+
 
   function badgeClass(status: TaskStatus) {
     if (status === 'COMPLETED') return 'badge ok';
@@ -286,7 +287,8 @@
 
             {#if task.activeStartedAt}
               <small style="display:block; margin-top:4px;">
-                ⏱ Live: {format(liveSec(task.activeStartedAt))}
+            ⏱ Live: {format(liveSec(task.activeStartedAt, now))}
+
               </small>
             {/if}
           </div>
