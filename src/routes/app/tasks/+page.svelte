@@ -100,6 +100,12 @@
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
+  function trackedSec(task: Task) {
+  const base = task.totalTrackedSec ?? 0;
+  const running = task.activeStartedAt ? liveSec(task.activeStartedAt, now) : 0;
+  return base + running;
+}
+
   function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
     if (!startedAtIso) return 0;
     const started = Date.parse(startedAtIso);
@@ -326,7 +332,7 @@
 
             <div style="margin-top:10px;">
               <small class="subtle" style="display:block; margin:0;">
-                Tracked: {format(task.totalTrackedSec)}
+               Tracked: {format(trackedSec(task))}
               </small>
 
               {#if task.activeStartedAt}
