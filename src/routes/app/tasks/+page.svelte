@@ -18,9 +18,16 @@
   let error = '';
   let loading = false;
 
+  // AI suggestion state
   let suggested: { title: string; description: string } | null = null;
   let suggesting = false;
 
+  // edit state
+  let editingId: string | null = null;
+  let editTitle = '';
+  let editDescription = '';
+
+  // live tick for active timer display
   let now = Date.now();
   let tick: any;
 
@@ -50,19 +57,18 @@
     }
   `;
 
-const UPDATE = `
-  mutation Update($id: ID!, $status: TaskStatus, $title: String, $description: String) {
-    updateTask(id: $id, status: $status, title: $title, description: $description) {
-      id
-      title
-      description
-      status
-      totalTrackedSec
-      activeStartedAt
+  const UPDATE = `
+    mutation Update($id: ID!, $status: TaskStatus, $title: String, $description: String) {
+      updateTask(id: $id, status: $status, title: $title, description: $description) {
+        id
+        title
+        description
+        status
+        totalTrackedSec
+        activeStartedAt
+      }
     }
-  }
-`;
-
+  `;
 
   const REMOVE = `
     mutation Remove($id: ID!) { deleteTask(id: $id) }
@@ -94,49 +100,12 @@ const UPDATE = `
     return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
-function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
-  if (!startedAtIso) return 0;
-  const started = Date.parse(startedAtIso);
-  if (Number.isNaN(started)) return 0;
-  return Math.max(0, Math.floor((nowMs - started) / 1000));
-}
-
-let editingId: string | null = null;
-let editTitle = '';
-let editDescription = '';
-
-function startEdit(t: Task) {
-  editingId = t.id;
-  editTitle = t.title;
-  editDescription = t.description ?? '';
-}
-
-function cancelEdit() {
-  editingId = null;
-  editTitle = '';
-  editDescription = '';
-}
-
-async function saveEdit(id: string) {
-  error = '';
-  const titleTrim = editTitle.trim();
-  const descTrim = editDescription.trim();
-
-  if (!titleTrim) {
-    error = 'Title cannot be empty.';
-    return;
+  function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
+    if (!startedAtIso) return 0;
+    const started = Date.parse(startedAtIso);
+    if (Number.isNaN(started)) return 0;
+    return Math.max(0, Math.floor((nowMs - started) / 1000));
   }
-
-  try {
-    await gql(UPDATE, { id, status: undefined, title: titleTrim, description: descTrim });
-    cancelEdit();
-    await loadTasks();
-  } catch (e: any) {
-    error = e?.message || 'Failed to update task';
-  }
-}
-
-
 
   function badgeClass(status: TaskStatus) {
     if (status === 'COMPLETED') return 'badge ok';
@@ -233,8 +202,37 @@ async function saveEdit(id: string) {
   function applySuggestion() {
     if (!suggested) return;
     title = suggested.title;
-    // NOTE: createTask currently accepts only input(title). Description can be applied when you add edit UI.
     suggested = null;
+  }
+
+  function startEdit(t: Task) {
+    editingId = t.id;
+    editTitle = t.title;
+    editDescription = t.description ?? '';
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    editTitle = '';
+    editDescription = '';
+  }
+
+  async function saveEdit(id: string) {
+    error = '';
+    const t = editTitle.trim();
+    const d = editDescription.trim();
+    if (!t) {
+      error = 'Title cannot be empty.';
+      return;
+    }
+
+    try {
+      await gql(UPDATE, { id, title: t, description: d });
+      cancelEdit();
+      await loadTasks();
+    } catch (e: any) {
+      error = e?.message || 'Failed to update task';
+    }
   }
 
   onMount(async () => {
@@ -289,10 +287,6 @@ async function saveEdit(id: string) {
     <p class="subtle" style="margin:8px 0 0;">
       <strong>Description:</strong> {suggested.description}
     </p>
-
-    <p class="subtle" style="margin:10px 0 0;">
-      Tip: “Use title” will fill the input — then click <span class="kbd">Add</span>.
-    </p>
   </div>
 {/if}
 
@@ -310,66 +304,61 @@ async function saveEdit(id: string) {
     <div class="card card-pad">
       <div class="row" style="justify-content:space-between; align-items:flex-start;">
         <div style="min-width:240px; flex:1;">
-          <div class="row" style="justify-content:space-between;">
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-           {#if editingId === task.id}
-  <div class="grid" style="gap:10px; width:100%;">
-    <input bind:value={editTitle} placeholder="Task title" />
-    <input bind:value={editDescription} placeholder="Short description (optional)" />
-    <div class="row">
-      <button class="btn-primary" on:click={() => saveEdit(task.id)}>Save</button>
-      <button on:click={cancelEdit}>Cancel</button>
-    </div>
-  </div>
-{:else}
-  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-    <strong style="font-size:16px;">{task.title}</strong>
-    <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
-    <button on:click={() => startEdit(task)}>Edit</button>
-  </div>
-
-  {#if task.description}
-    <p class="subtle" style="margin:10px 0 0;">{task.description}</p>
-  {/if}
-{/if}
-
-              <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
+          {#if editingId === task.id}
+            <div class="grid" style="gap:10px; width:100%;">
+              <input bind:value={editTitle} placeholder="Task title" />
+              <input bind:value={editDescription} placeholder="Short description (optional)" />
+              <div class="row">
+                <button class="btn-primary" on:click={() => saveEdit(task.id)}>Save</button>
+                <button on:click={cancelEdit}>Cancel</button>
+              </div>
             </div>
-          </div>
+          {:else}
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <strong style="font-size:16px;">{task.title}</strong>
+              <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
+              <button on:click={() => startEdit(task)}>Edit</button>
+            </div>
 
-          <div style="margin-top:8px;">
-            <small class="subtle" style="display:block; margin:0;">
-              Tracked: {format(task.totalTrackedSec)}
-            </small>
+            {#if task.description}
+              <p class="subtle" style="margin:10px 0 0;">{task.description}</p>
+            {/if}
+
+            <div style="margin-top:10px;">
+              <small class="subtle" style="display:block; margin:0;">
+                Tracked: {format(task.totalTrackedSec)}
+              </small>
+
+              {#if task.activeStartedAt}
+                <small style="display:block; margin-top:4px;">
+                  ⏱ Live: {format(liveSec(task.activeStartedAt, now))}
+                </small>
+              {/if}
+            </div>
+          {/if}
+        </div>
+
+        {#if editingId !== task.id}
+          <div class="row" style="justify-content:flex-end;">
+            <select
+              value={task.status}
+              on:change={(e) => setStatus(task.id, e.currentTarget.value as TaskStatus)}
+              style="min-width:180px;"
+            >
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
 
             {#if task.activeStartedAt}
-              <small style="display:block; margin-top:4px;">
-            ⏱ Live: {format(liveSec(task.activeStartedAt, now))}
-
-              </small>
+              <button on:click={() => stopTimer(task.id)}>Stop</button>
+            {:else}
+              <button class="btn-primary" on:click={() => startTimer(task.id)}>Start</button>
             {/if}
+
+            <button class="btn-danger" on:click={() => deleteTask(task.id)}>Delete</button>
           </div>
-        </div>
-
-        <div class="row" style="justify-content:flex-end;">
-          <select
-            value={task.status}
-            on:change={(e) => setStatus(task.id, e.currentTarget.value as TaskStatus)}
-            style="min-width:180px;"
-          >
-            <option value="PENDING">Pending</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-
-          {#if task.activeStartedAt}
-            <button on:click={() => stopTimer(task.id)}>Stop</button>
-          {:else}
-            <button class="btn-primary" on:click={() => startTimer(task.id)}>Start</button>
-          {/if}
-
-          <button class="btn-danger" on:click={() => deleteTask(task.id)}>Delete</button>
-        </div>
+        {/if}
       </div>
     </div>
   {/each}

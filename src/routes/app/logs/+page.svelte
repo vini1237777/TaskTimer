@@ -59,7 +59,7 @@
 </script>
 
 <h1 class="h1">Time Logs</h1>
-<p class="subtle">Sessions you tracked — with task name and timestamps.</p>
+<p class="subtle">Sessions Tracked.</p>
 
 {#if loading}
   <p class="subtle">Loading…</p>
