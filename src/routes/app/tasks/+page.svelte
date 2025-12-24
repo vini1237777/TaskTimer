@@ -325,10 +325,9 @@
               <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
               <button on:click={() => startEdit(task)}>Edit</button>
             </div>
-
-            {#if task.description}
-              <p class="subtle" style="margin:10px 0 0;">{task.description}</p>
-            {/if}
+<p class="subtle" style="margin:10px 0 0;">
+  {task.description?.trim() ? task.description : 'No description yet — click Edit to add one.'}
+</p>
 
             <div style="margin-top:10px;">
               <small class="subtle" style="display:block; margin:0;">
