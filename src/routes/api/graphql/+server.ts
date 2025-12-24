@@ -48,6 +48,7 @@ const yogaApp = createYoga<RequestEvent>({
       type TimeLog {
         id: ID!
         taskId: ID!
+        taskTitle: String!
         startedAt: String!
         endedAt: String
         durationSec: Int!

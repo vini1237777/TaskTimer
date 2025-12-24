@@ -5,6 +5,10 @@ export const taskDao = {
     Task.find({ userId }).sort({ createdAt: -1 }).lean(),
   findByIdForUser: (userId: string, id: string) =>
     Task.findOne({ _id: id, userId }).lean(),
+  findByUserAndIds: (userId: string, ids: string[]) =>
+    Task.find({ userId, _id: { $in: ids } })
+      .select({ _id: 1, title: 1 })
+      .lean(),
   create: (userId: string, data: { title: string; description?: string }) =>
     Task.create({
       userId,
