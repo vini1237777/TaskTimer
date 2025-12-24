@@ -50,18 +50,19 @@
     }
   `;
 
-  const UPDATE = `
-    mutation Update($id: ID!, $status: TaskStatus) {
-      updateTask(id: $id, status: $status) {
-        id
-        title
-        description
-        status
-        totalTrackedSec
-        activeStartedAt
-      }
+const UPDATE = `
+  mutation Update($id: ID!, $status: TaskStatus, $title: String, $description: String) {
+    updateTask(id: $id, status: $status, title: $title, description: $description) {
+      id
+      title
+      description
+      status
+      totalTrackedSec
+      activeStartedAt
     }
-  `;
+  }
+`;
+
 
   const REMOVE = `
     mutation Remove($id: ID!) { deleteTask(id: $id) }
@@ -99,6 +100,42 @@ function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
   if (Number.isNaN(started)) return 0;
   return Math.max(0, Math.floor((nowMs - started) / 1000));
 }
+
+let editingId: string | null = null;
+let editTitle = '';
+let editDescription = '';
+
+function startEdit(t: Task) {
+  editingId = t.id;
+  editTitle = t.title;
+  editDescription = t.description ?? '';
+}
+
+function cancelEdit() {
+  editingId = null;
+  editTitle = '';
+  editDescription = '';
+}
+
+async function saveEdit(id: string) {
+  error = '';
+  const titleTrim = editTitle.trim();
+  const descTrim = editDescription.trim();
+
+  if (!titleTrim) {
+    error = 'Title cannot be empty.';
+    return;
+  }
+
+  try {
+    await gql(UPDATE, { id, status: undefined, title: titleTrim, description: descTrim });
+    cancelEdit();
+    await loadTasks();
+  } catch (e: any) {
+    error = e?.message || 'Failed to update task';
+  }
+}
+
 
 
   function badgeClass(status: TaskStatus) {
@@ -275,7 +312,27 @@ function liveSec(startedAtIso: string | null | undefined, nowMs: number) {
         <div style="min-width:240px; flex:1;">
           <div class="row" style="justify-content:space-between;">
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <strong style="font-size:16px;">{task.title}</strong>
+           {#if editingId === task.id}
+  <div class="grid" style="gap:10px; width:100%;">
+    <input bind:value={editTitle} placeholder="Task title" />
+    <input bind:value={editDescription} placeholder="Short description (optional)" />
+    <div class="row">
+      <button class="btn-primary" on:click={() => saveEdit(task.id)}>Save</button>
+      <button on:click={cancelEdit}>Cancel</button>
+    </div>
+  </div>
+{:else}
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <strong style="font-size:16px;">{task.title}</strong>
+    <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
+    <button on:click={() => startEdit(task)}>Edit</button>
+  </div>
+
+  {#if task.description}
+    <p class="subtle" style="margin:10px 0 0;">{task.description}</p>
+  {/if}
+{/if}
+
               <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
             </div>
           </div>
