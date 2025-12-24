@@ -17,7 +17,7 @@ export const taskService = {
 
     const res = await taskDao.deleteForUser(userId, taskId);
 
-    return !!res;
+    return res.deletedCount === 1;
   },
 
   async create(userId: string, input: string) {

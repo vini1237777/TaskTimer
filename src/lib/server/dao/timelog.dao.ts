@@ -15,6 +15,7 @@ export const timelogDao = {
       endedAt: null,
       durationSec: 0,
     }),
+
   deleteByUserAndTask: (userId: string, taskId: string) =>
     TimeLog.deleteMany({ userId, taskId }),
 
