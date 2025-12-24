@@ -31,6 +31,7 @@ export const timelogService = {
   },
 
   async stop(userId: string, taskId: string) {
+    if (!userId) throw ERR.unauth();
     await connectMongo();
 
     const active = await timelogDao.activeForTask(userId, taskId);
@@ -46,7 +47,6 @@ export const timelogService = {
     active.durationSec = durationSec;
 
     await timelogDao.save(active);
-
     return active;
   },
 };
