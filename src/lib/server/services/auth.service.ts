@@ -28,6 +28,9 @@ export async function signupUser(email: string, password: string) {
   const rawToken = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
   await sessionDao.create(user._id.toString(), tokenHash(rawToken), expiresAt);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) throw new Error("INVALID_EMAIL");
+  if (!password || password.length < 6) throw new Error("WEAK_PASSWORD");
 
   return { user: { id: user._id.toString(), email: user.email }, rawToken };
 }
