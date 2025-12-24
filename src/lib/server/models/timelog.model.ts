@@ -16,7 +16,7 @@ const TimeLogSchema = new mongoose.Schema(
     },
     startedAt: { type: Date, required: true, index: true },
     endedAt: { type: Date, default: null, index: true },
-    durationSec: { type: Number, default: 0 },
+    durationSec: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 );

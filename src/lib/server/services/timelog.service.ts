@@ -31,30 +31,22 @@ export const timelogService = {
   },
 
   async stop(userId: string, taskId: string) {
-    if (!userId) throw ERR.unauth();
-    if (!taskId) throw ERR.badInput("taskId is required");
-
     await connectMongo();
 
     const active = await timelogDao.activeForTask(userId, taskId);
-    if (!active) throw ERR.conflict("NO_ACTIVE_TIMER");
+    if (!active) throw ERR.badRequest("NO_ACTIVE_TIMER");
 
     const endedAt = new Date();
-    const durationSec = Math.max(
-      0,
-      Math.floor((endedAt.getTime() - active.startedAt.getTime()) / 1000)
-    );
+    const startedAt = new Date(active.startedAt);
+
+    const diffMs = endedAt.getTime() - startedAt.getTime();
+    const durationSec = Math.max(1, Math.floor(diffMs / 1000));
 
     active.endedAt = endedAt;
     active.durationSec = durationSec;
+
     await timelogDao.save(active);
 
-    return {
-      id: active._id.toString(),
-      taskId,
-      startedAt: active.startedAt.toISOString(),
-      endedAt: endedAt.toISOString(),
-      durationSec,
-    };
+    return active;
   },
 };
