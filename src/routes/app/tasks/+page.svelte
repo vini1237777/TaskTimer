@@ -222,7 +222,7 @@
     </div>
 
     <button on:click={suggest} disabled={suggesting || !title.trim()}>
-      {suggesting ? 'Suggesting…' : '✨ Suggest'}
+      {suggesting ? 'Suggesting…' : 'Suggest'}
     </button>
 
     <button class="btn-primary" on:click={addTask} disabled={loading || !title.trim()}>
@@ -264,7 +264,7 @@
   {#if tasks.length === 0}
     <div class="card card-pad">
       <strong>No tasks yet.</strong>
-      <p class="subtle" style="margin:8px 0 0;">Create one above and start tracking 👆</p>
+      <p class="subtle" style="margin:8px 0 0;">Create one above and start tracking</p>
     </div>
   {/if}
 

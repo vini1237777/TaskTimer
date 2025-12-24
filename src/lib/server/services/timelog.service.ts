@@ -19,7 +19,6 @@ export const timelogService = {
     const startedAt = new Date();
     const log = await timelogDao.create(userId, taskId, startedAt);
 
-    // optionally set task status IN_PROGRESS
     await taskDao.updateForUser(userId, taskId, { status: "IN_PROGRESS" });
 
     return {
