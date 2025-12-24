@@ -10,14 +10,14 @@ export const timelogQueryService = {
   },
 
   async totals(userId: string) {
-    if (!userId) throw ERR.unauth();
     await connectMongo();
+
     const rows = await timelogDao.totalsByTask(userId);
+
     const map = new Map<string, number>();
-    for (const r of rows) map.set(String(r._id), Number(r.totalSec || 0));
+    for (const r of rows) map.set(String(r._id), Number(r.total || 0));
     return map;
   },
-
   async active(userId: string) {
     if (!userId) throw ERR.unauth();
     await connectMongo();

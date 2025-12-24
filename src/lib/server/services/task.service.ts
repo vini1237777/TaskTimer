@@ -20,13 +20,16 @@ export const taskService = {
     return res.deletedCount === 1;
   },
 
-  async create(userId: string, input: string) {
+  async create(userId: string, input: string, description = "") {
     if (!userId) throw ERR.unauth();
     const title = (input || "").trim();
     if (!title) throw ERR.badInput("title is required");
 
     await connectMongo();
-    const task = await taskDao.create(userId, { title, description: "" });
+    const task = await taskDao.create(userId, {
+      title,
+      description: description.trim(),
+    });
 
     return {
       id: task._id.toString(),

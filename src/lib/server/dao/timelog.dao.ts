@@ -33,7 +33,7 @@ export const timelogDao = {
 
   totalsByTask: (userId: string) =>
     TimeLog.aggregate([
-      { $match: { userId } },
-      { $group: { _id: "$taskId", totalSec: { $sum: "$durationSec" } } },
+      { $match: { userId, endedAt: { $ne: null }, durationSec: { $gt: 0 } } },
+      { $group: { _id: "$taskId", total: { $sum: "$durationSec" } } },
     ]),
 };

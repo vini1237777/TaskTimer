@@ -35,13 +35,17 @@ export const taskGqlController = {
       const t = await taskService.create(user.id, args.input);
       if (!args.input.trim()) throw new Error("TASK_EMPTY");
       if (args.input.length > 200) throw new Error("TASK_TOO_LONG");
+      const [totalsMap, activeMap] = await Promise.all([
+        timelogQueryService.totals(user.id),
+        timelogQueryService.active(user.id),
+      ]);
       return {
-        id: t.id,
+        id: String(t.id),
         title: t.title,
         description: t.description ?? "",
         status: t.status,
-        totalTrackedSec: 0,
-        activeStartedAt: null,
+        totalTrackedSec: totalsMap.get(t.id) ?? 0,
+        activeStartedAt: activeMap.get(t.id) ?? null,
       };
     } catch (e) {
       mapServiceError(e);

@@ -325,15 +325,12 @@
               <span class={badgeClass(task.status)}>{badgeText(task.status)}</span>
               <button on:click={() => startEdit(task)}>Edit</button>
             </div>
-<p class="subtle" style="margin:10px 0 0;">
-  {task.description?.trim() ? task.description : 'No description yet — click Edit to add one.'}
-</p>
+
+            {#if task.description}
+              <p class="subtle" style="margin:10px 0 0;">{task.description}</p>
+            {/if}
 
             <div style="margin-top:10px;">
-              <small class="subtle" style="display:block; margin:0;">
-               Tracked: {format(trackedSec(task))}
-              </small>
-
               {#if task.activeStartedAt}
                 <small style="display:block; margin-top:4px;">
                   ⏱ Live: {format(liveSec(task.activeStartedAt, now))}
