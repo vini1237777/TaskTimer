@@ -1,6 +1,7 @@
 import { connectMongo } from "$lib/server/db/mongo";
 import { taskDao } from "$lib/server/dao/task.dao";
 import { ERR } from "./errors";
+import { timelogDao } from "../dao/timelog.dao";
 
 type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
 
@@ -9,6 +10,14 @@ export const taskService = {
     if (!userId) throw ERR.unauth();
     await connectMongo();
     return taskDao.listByUser(userId);
+  },
+
+  delete: async (userId: string, taskId: string) => {
+    await timelogDao.deleteByUserAndTask(userId, taskId);
+
+    const res = await taskDao.deleteForUser(userId, taskId);
+
+    return !!res;
   },
 
   async create(userId: string, input: string) {

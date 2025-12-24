@@ -75,7 +75,7 @@ export const taskGqlController = {
   deleteTask: async (_: any, args: any, ctx: any) => {
     const user = requireAuth(ctx);
     try {
-      return await taskService.remove(user.id, args.id);
+      return await taskService.delete(user.id, args.id);
     } catch (e) {
       mapServiceError(e);
     }
