@@ -32,20 +32,26 @@ export const taskGqlController = {
   createTask: async (_: any, args: any, ctx: any) => {
     const user = requireAuth(ctx);
     try {
-      const t = await taskService.create(user.id, args.input);
-      if (!args.input.trim()) throw new Error("TASK_EMPTY");
-      if (args.input.length > 200) throw new Error("TASK_TOO_LONG");
+      const input = (args.input ?? "").trim();
+      if (!input) throw new Error("TASK_EMPTY");
+      if (input.length > 200) throw new Error("TASK_TOO_LONG");
+
+      const t = await taskService.create(user.id, input);
+
       const [totalsMap, activeMap] = await Promise.all([
         timelogQueryService.totals(user.id),
         timelogQueryService.active(user.id),
       ]);
+
+      const id = String(t.id);
+
       return {
-        id: String(t.id),
+        id,
         title: t.title,
         description: t.description ?? "",
         status: t.status,
-        totalTrackedSec: totalsMap.get(t.id) ?? 0,
-        activeStartedAt: activeMap.get(t.id) ?? null,
+        totalTrackedSec: totalsMap.get(id) ?? 0,
+        activeStartedAt: activeMap.get(id) ?? null,
       };
     } catch (e) {
       mapServiceError(e);
