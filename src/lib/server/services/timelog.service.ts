@@ -34,7 +34,7 @@ export const timelogService = {
     await connectMongo();
 
     const active = await timelogDao.activeForTask(userId, taskId);
-    if (!active) throw ERR.badRequest("NO_ACTIVE_TIMER");
+    if (!active) throw ERR.badInput("NO_ACTIVE_TIMER");
 
     const endedAt = new Date();
     const startedAt = new Date(active.startedAt);
