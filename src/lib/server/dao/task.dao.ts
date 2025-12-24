@@ -23,4 +23,6 @@ export const taskDao = {
     ).lean(),
   deleteForUser: (userId: string, id: string) =>
     Task.deleteOne({ _id: id, userId }),
+  updateById: (userId: string, id: string, update: any) =>
+    Task.findOneAndUpdate({ userId, _id: id }, { $set: update }, { new: true }),
 };

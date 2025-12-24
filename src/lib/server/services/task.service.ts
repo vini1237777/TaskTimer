@@ -39,32 +39,28 @@ export const taskService = {
   async update(
     userId: string,
     id: string,
-    patch: { title?: string; description?: string; status?: TaskStatus }
+    patch: { title?: string; description?: string; status?: string }
   ) {
     if (!userId) throw ERR.unauth();
-    if (!id) throw ERR.badInput("id is required");
+    await connectMongo();
 
     const update: any = {};
-    if (typeof patch.title === "string") update.title = patch.title.trim();
-    if (typeof patch.description === "string")
-      update.description = patch.description;
-    if (patch.status) {
-      update.status = patch.status;
-      update.completedAt = patch.status === "COMPLETED" ? new Date() : null;
+    if (patch.title !== undefined) {
+      const t = patch.title.trim();
+      if (!t) throw ERR.badInput("TITLE_EMPTY");
+      update.title = t;
     }
+    if (patch.description !== undefined) {
+      update.description = patch.description.trim();
+    }
+    if (patch.status !== undefined) update.status = patch.status;
 
-    await connectMongo();
-    const task = await taskDao.updateForUser(userId, id, update);
-    if (!task) throw ERR.notFound();
+    if (Object.keys(update).length === 0) throw ERR.badInput("NO_FIELDS");
 
-    return {
-      id: task._id.toString(),
-      title: task.title,
-      description: task.description ?? "",
-      status: task.status as TaskStatus,
-    };
+    const updated = await taskDao.updateForUser(userId, id, update);
+    if (!updated) throw ERR.notFound();
+    return updated;
   },
-
   async remove(userId: string, id: string) {
     if (!userId) throw ERR.unauth();
     if (!id) throw ERR.badInput("id is required");
