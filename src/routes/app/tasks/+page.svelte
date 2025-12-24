@@ -18,16 +18,13 @@
   let error = '';
   let loading = false;
 
-  // AI suggestion state
   let suggested: { title: string; description: string } | null = null;
   let suggesting = false;
 
-  // edit state
   let editingId: string | null = null;
   let editTitle = '';
   let editDescription = '';
 
-  // live tick for active timer display
   let now = Date.now();
   let tick: any;
 
@@ -250,7 +247,7 @@
 
 <h1 class="h1">Tasks</h1>
 <p class="subtle">
-  Add a task, hit <span class="kbd">Start</span>, and let the timer do the rest.
+  Add a task, hit <span class="kbd">Start</span>.
 </p>
 
 <div class="card card-pad" style="max-width:720px;">
