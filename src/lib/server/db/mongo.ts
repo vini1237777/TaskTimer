@@ -7,9 +7,7 @@ export async function connectMongo() {
   if (connected) return;
 
   if (!MONGODB_URI) {
-    throw new Error(
-      "MONGODB_URI is missing. Add it to .env / Vercel env vars."
-    );
+    throw new Error("MONGODB_URI is missing.");
   }
 
   await mongoose.connect(MONGODB_URI);
